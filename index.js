@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const jwt = require("jsonwebtoken")
 require("dotenv").config();
 
 const port = process.env.PORt || 5000
@@ -13,7 +14,28 @@ app.use(express.json())
 
 
 
+// jwt function
+// const verifyToken = (req, res, next) => {
+// console.log('verify');
+// console.log(req.headers.authorization);
+// const authorization = req.headers.authorization;
+// console.log("hsjjs" + authorization);
+// // if (!authorization) {
+//     return res.send({ error: true, message: "unauthorized" })
 
+// }
+// const token = authorization.split(' ')[1];
+// console.log(token);
+// jwt.verify(token, process.env.WEB_TOKEN, (error, decoded) => {
+//     if (error) {
+//         return res.status(404).send({ error: true, message: 'unauthorized' })
+
+//     }
+//     res.decoded = decoded;
+//     next()
+// })
+
+// }
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -38,11 +60,27 @@ async function run() {
         const servicesCollection = client.db("carDoctor").collection("services");
         const bookingCollection = client.db("carDoctor").collection("booking");
 
+        // jwt
+
+        // app.post('/jwt', (req, res) => {
+        //     const user = req.body;
+        //     console.log(user);
+        //     const token = jwt.sign(user, process.env.WEB_TOKEN, { expiresIn: '1h' })
+        //     res.send({ token })
+        // })
+
+
+
+
+        //   ################ services data
+        // all services data
         app.get('/services', async(req, res) => {
             const cursor = servicesCollection.find()
             const result = await cursor.toArray()
             res.send(result)
         })
+
+        // single services data
 
         app.get('/services/:id', async(req, res) => {
                 const id = req.params.id;
@@ -53,9 +91,17 @@ async function run() {
                 const result = await servicesCollection.findOne(query, options)
                 res.send(result)
             })
-            //  booking oparetion
+            // #####################  booking oparetion
 
         app.get('/booking', async(req, res) => {
+            // console.log(req.headers.authorization);
+            // const decoded = res.decoded;
+            // console.log('d' + decoded);
+            // if (decoded.email !== req.body.email) {
+            //     return res.status(403).send({ error: true, message: 'fribon ' })
+
+            // }
+            // console.log(req.headers.authorization.token);
             let query = {}
             if (req.query && req.query.email) {
                 query = { email: req.query.email }
@@ -67,7 +113,6 @@ async function run() {
         app.patch('/booking/:id', async(req, res) => {
             const id = req.params.id;
             const upDateBooking = req.body
-            console.log(id);
             const filter = { _id: new ObjectId(id) }
             const upDate = {
                 $set: {
